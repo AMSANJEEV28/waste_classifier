@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-w(8=fazqna0evcxi)$qkj_-nm0^optv$ynnrbia$m9xnxdnq8&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "waste-classifier-z93u.onrender.com",  # Add your Render domain here
+    "127.0.0.1",
+    "localhost",
+]
 
 
 # Application definition
