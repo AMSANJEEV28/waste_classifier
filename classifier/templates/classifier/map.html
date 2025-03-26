@@ -1,0 +1,498 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Bin Locations 🗺️</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #E8F5E9;
+        }
+
+        h1 {
+            color: #2E7D32;
+            margin-top: 20px;
+        }
+
+        #map {
+            width: 90%;
+            height: 500px;
+            margin: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        #back-btn {
+            background: #0288D1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 15px;
+        }
+
+        #back-btn:hover {
+            background: #01579B;
+        }
+    </style>
+</head>
+<body>
+    <h1>🗺️ Waste Bin Locations</h1>
+    <p>Click on the map to add a new waste bin.</p>
+    <div id="map"></div>
+    <button id="back-btn" onclick="window.location.href='/'">🏠 Back to Home</button>
+
+    <script>
+        var map = L.map('map').setView([30.0240923, 78.2678488], 14);
+
+        // Load OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Fetch waste bins from Django backend
+        $.getJSON("/get-waste-bins/", function(data) {
+            data.forEach(function(bin) {
+                let marker = L.marker([bin.lat, bin.lon], { draggable: true }).addTo(map)
+                    .bindPopup(`<b>🗑️ Waste Bin</b><br>${bin.description}<br><small>Drag to update location</small>`);
+
+                // Update bin location on drag end
+                marker.on("dragend", function (event) {
+                    let newLatLng = event.target.getLatLng();
+
+                    $.ajax({
+                        url: "/update-bin-location/",
+                        type: "POST",
+                        data: {
+                            'bin_id': bin.id,
+                            'lat': newLatLng.lat,
+                            'lon': newLatLng.lng,
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'
+                        },
+                        success: function(response) {
+                            alert("✅ Location updated successfully!");
+                        },
+                        error: function() {
+                            alert("⚠️ Error updating location.");
+                        }
+                    });
+                });
+            });
+        });
+
+        // Add new bin when user clicks on the map
+        map.on('click', function(e) {
+            let lat = e.latlng.lat;
+            let lon = e.latlng.lng;
+            let description = prompt("Enter description for this bin:");
+
+            if (description) {
+                $.ajax({
+                    url: "/add-waste-bin/",
+                    type: "POST",
+                    data: {
+                        'lat': lat,
+                        'lon': lon,
+                        'description': description,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        alert("✅ New waste bin added!");
+                        location.reload();  // Reload to show new bin
+                    },
+                    error: function() {
+                        alert("⚠️ Error adding bin.");
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Management Map 🗺️</title>
+
+    <!-- Leaflet.js (for GIS map) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <!-- jQuery for AJAX -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #E8F5E9;
+        }
+
+        h1 {
+            color: #2E7D32;
+            margin-top: 20px;
+        }
+
+        #map {
+            width: 90%;
+            height: 450px;
+            margin: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        #filter {
+            margin: 10px;
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        #back-btn {
+            background: #0288D1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 15px;
+        }
+
+        #back-btn:hover {
+            background: #01579B;
+        }
+    </style>
+</head>
+<body>
+    <h1>🗺️ Waste Management Map</h1>
+    <p>Click on the map to add a new waste bin or report waste.</p>
+
+    <!-- Waste Filter Dropdown -->
+    <label for="filter">Filter by Waste Type:</label>
+    <select id="filter">
+        <option value="">All</option>
+        <option value="Plastic">Plastic</option>
+        <option value="Organic">Organic</option>
+        <option value="Metal">Metal</option>
+        <option value="Glass">Glass</option>
+        <option value="Paper">Paper</option>
+        <option value="Cardboard">Cardboard</option>
+        <option value="Trash">Trash</option>
+    </select>
+
+    <div id="map"></div>
+    <button id="back-btn" onclick="window.location.href='/'">🏠 Back to Home</button>
+<!-- 
+    <script>
+        var map = L.map('map').setView([30.0240923, 78.2678488], 15);
+
+        // Load OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Load waste bins
+        function loadWasteBins() {
+            $.getJSON("/get-waste-bins/", function(data) {
+                data.forEach(function(bin) {
+                    let marker = L.marker([bin.lat, bin.lon], { draggable: true }).addTo(map)
+                        .bindPopup(`<b>🗑️ Waste Bin</b><br>${bin.description}<br><small>Drag to update location</small>`);
+
+                    // Update bin location on drag end
+                    marker.on("dragend", function (event) {
+                        let newLatLng = event.target.getLatLng();
+                        $.ajax({
+                            url: "/update-bin-location/",
+                            type: "POST",
+                            data: {
+                                'bin_id': bin.id,
+                                'lat': newLatLng.lat,
+                                'lon': newLatLng.lng,
+                                'csrfmiddlewaretoken': '{{ csrf_token }}'
+                            },
+                            success: function() {
+                                alert("✅ Location updated successfully!");
+                            },
+                            error: function() {
+                                alert("⚠️ Error updating location.");
+                            }
+                        });
+                    });
+                });
+            });
+        }
+
+        // Load waste reports (with filtering)
+        function loadWasteReports(filterType = '') {
+            let url = "/get-waste-reports/";
+            if (filterType) url += "?waste_type=" + filterType;
+
+            $.getJSON(url, function(data) {
+                data.forEach(function(report) {
+                    let iconColor = {
+                        'Plastic': 'blue',
+                        'Organic': 'green',
+                        'Metal': 'gray',
+                        'Glass': 'red',
+                        'Paper': 'purple',
+                        'Cardboard': 'orange',
+                        'Trash': 'black'
+                    }[report.waste_type] || 'black';
+
+                    L.circleMarker([report.lat, report.lon], {
+                        radius: 8,
+                        color: iconColor,
+                        fillColor: iconColor,
+                        fillOpacity: 0.7
+                    }).addTo(map)
+                        .bindPopup(`<b>🗑️ ${report.waste_type} Waste</b><br>${report.description}`);
+                });
+            });
+        }
+
+        // Filter waste reports
+        $("#filter").change(function() {
+            map.eachLayer((layer) => {
+                if (!!layer.toGeoJSON) { map.removeLayer(layer); }
+            });
+            loadWasteBins();
+            loadWasteReports(this.value);
+        });
+
+        // Click event: Add new waste bin or waste report
+        map.on('click', function(e) {
+            let lat = e.latlng.lat;
+            let lon = e.latlng.lng;
+            let choice = confirm("Do you want to add a new waste bin?\nPress 'Cancel' to report waste instead.");
+
+            if (choice) {
+                // Add a waste bin
+                let description = prompt("Enter description for this bin:");
+                if (description) {
+                    $.ajax({
+                        url: "/add-waste-bin/",
+                        type: "POST",
+                        data: {
+                            'lat': lat,
+                            'lon': lon,
+                            'description': description,
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'
+                        },
+                        success: function() {
+                            alert("✅ New waste bin added!");
+                            location.reload();
+                        },
+                        error: function() {
+                            alert("⚠️ Error adding bin.");
+                        }
+                    });
+                }
+            } else {
+                // Report waste
+                let waste_type = prompt("Enter waste type (Plastic/Organic/Metal/Glass/Paper/Cardboard/Trash):");
+                let description = prompt("Enter a description:");
+
+                if (waste_type && description) {
+                    $.ajax({
+                        url: "/add-waste-report/",
+                        type: "POST",
+                        data: {
+                            'lat': lat, 'lon': lon, 'waste_type': waste_type, 'description': description,
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'
+                        },
+                        success: function() {
+                            alert("✅ Waste report added!");
+                            location.reload();
+                        },
+                        error: function() {
+                            alert("⚠️ Error adding report.");
+                        }
+                    });
+                }
+            }
+        });
+
+        // Initial data load
+        loadWasteBins();
+        loadWasteReports();
+    </script>
+
+     -->
+
+     <script>
+        var map = L.map('map').setView([30.0240923, 78.2678488], 15);
+    
+        // Tile layers
+        var normalMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        });
+    
+        var satelliteMap = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            attribution: '&copy; Google Maps'
+        });
+    
+        // Set default to satellite view
+        satelliteMap.addTo(map);
+    
+        // Layer control for toggling between Normal & Satellite view
+        L.control.layers({
+            "🗺️ Normal View": normalMap,
+            "🛰️ Satellite View": satelliteMap
+        }).addTo(map);
+    
+        // Load waste bins
+        function loadWasteBins() {
+            $.getJSON("/get-waste-bins/", function(data) {
+                data.forEach(function(bin) {
+                    let marker = L.marker([bin.lat, bin.lon], { draggable: true }).addTo(map)
+                        .bindPopup(`<b>🗑️ Waste Bin</b><br>${bin.description}<br><small>Drag to update location</small>`);
+    
+                    // Update bin location on drag end
+                    marker.on("dragend", function (event) {
+                        let newLatLng = event.target.getLatLng();
+                        $.ajax({
+                            url: "/update-bin-location/",
+                            type: "POST",
+                            data: {
+                                'bin_id': bin.id,
+                                'lat': newLatLng.lat,
+                                'lon': newLatLng.lng,
+                                'csrfmiddlewaretoken': '{{ csrf_token }}'
+                            },
+                            success: function() {
+                                alert("✅ Location updated successfully!");
+                            },
+                            error: function() {
+                                alert("⚠️ Error updating location.");
+                            }
+                        });
+                    });
+                });
+            });
+        }
+    
+        // Load waste reports (with filtering)
+        function loadWasteReports(filterType = '') {
+            let url = "/get-waste-reports/";
+            if (filterType) url += "?waste_type=" + filterType;
+    
+            $.getJSON(url, function(data) {
+                data.forEach(function(report) {
+                    let iconColor = {
+                        'Plastic': 'blue',
+                        'Organic': 'green',
+                        'Metal': 'gray',
+                        'Glass': 'red',
+                        'Paper': 'purple',
+                        'Cardboard': 'orange',
+                        'Trash': 'black'
+                    }[report.waste_type] || 'black';
+    
+                    L.circleMarker([report.lat, report.lon], {
+                        radius: 8,
+                        color: iconColor,
+                        fillColor: iconColor,
+                        fillOpacity: 0.7
+                    }).addTo(map)
+                        .bindPopup(`<b>🗑️ ${report.waste_type} Waste</b><br>${report.description}`);
+                });
+            });
+        }
+    
+        // Filter waste reports
+        $("#filter").change(function() {
+            map.eachLayer((layer) => {
+                if (!!layer.toGeoJSON) { map.removeLayer(layer); }
+            });
+            loadWasteBins();
+            loadWasteReports(this.value);
+        });
+    
+        // Click event: Add new waste bin or waste report
+        map.on('click', function(e) {
+            let lat = e.latlng.lat;
+            let lon = e.latlng.lng;
+            let choice = confirm("Do you want to add a new waste bin?\nPress 'Cancel' to report waste instead.");
+    
+            if (choice) {
+                // Add a waste bin
+                let description = prompt("Enter description for this bin:");
+                if (description) {
+                    $.ajax({
+                        url: "/add-waste-bin/",
+                        type: "POST",
+                        data: {
+                            'lat': lat,
+                            'lon': lon,
+                            'description': description,
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'
+                        },
+                        success: function() {
+                            alert("✅ New waste bin added!");
+                            location.reload();
+                        },
+                        error: function() {
+                            alert("⚠️ Error adding bin.");
+                        }
+                    });
+                }
+            } else {
+                // Report waste
+                let waste_type = prompt("Enter waste type (Plastic/Organic/Metal/Glass/Paper/Cardboard/Trash):");
+                let description = prompt("Enter a description:");
+    
+                if (waste_type && description) {
+                    $.ajax({
+                        url: "/add-waste-report/",
+                        type: "POST",
+                        data: {
+                            'lat': lat, 'lon': lon, 'waste_type': waste_type, 'description': description,
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'
+                        },
+                        success: function() {
+                            alert("✅ Waste report added!");
+                            location.reload();
+                        },
+                        error: function() {
+                            alert("⚠️ Error adding report.");
+                        }
+                    });
+                }
+            }
+        });
+    
+        // Initial data load
+        loadWasteBins();
+        loadWasteReports();
+    </script>
+    
+
+
+</body>
+</html>

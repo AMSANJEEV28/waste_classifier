@@ -1,0 +1,412 @@
+<!-- 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Classifier 🌱</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #E8F5E9; /* Light Green */
+            color: #2E7D32; /* Dark Green */
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-top: 20px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            margin: auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin-top: 30px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-label {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-block;
+            margin-bottom: 15px;
+            transition: 0.3s;
+        }
+
+        .file-label:hover {
+            background: #388E3C;
+        }
+
+        button {
+            background: #2E7D32;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #1B5E20;
+        }
+
+        #loading {
+            display: none;
+            font-size: 16px;
+            color: #FF8F00;
+            margin-top: 15px;
+        }
+
+        #results {
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background: #E8F5E9;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        img {
+            margin-top: 5px;
+            border-radius: 5px;
+            width: 80px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌍 Waste Classification System</h1>
+    
+    <div class="container">
+        <form id="upload-form" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="file-input" class="file-label">📸 Choose Images</label>
+            <input type="file" id="file-input" name="images" multiple required>
+            <button type="submit">🚀 Upload & Classify</button>
+        </form>
+
+        <div id="loading">⏳ Processing images...</div>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function getCsrfToken() {
+            const name = "csrftoken=";
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const cookies = decodedCookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if (cookie.startsWith(name)) {
+                    return cookie.substring(name.length);
+                }
+            }
+            return "";
+        }
+
+        $("#upload-form").on("submit", function(event) {
+            event.preventDefault();
+            const formData = new FormData();
+            const files = document.getElementById("file-input").files;
+
+            for (let i = 0; i < files.length; i++) {
+                formData.append("images", files[i]);
+            }
+
+            $("#loading").show();
+
+            $.ajax({
+                url: "{% url 'predict_batch' %}",
+                type: "POST",
+                data: formData,
+                contentType: false,
+                processData: false,
+                headers: {
+                    'X-CSRFToken': getCsrfToken()
+                },
+                success: function(response) {
+                    $("#loading").hide();
+                    let resultHtml = "<h2>📝 Classification Results</h2>";
+                    response.forEach(function(item) {
+                        resultHtml += `<div class="result-item">
+                            <img src="${item.image_url}" alt="Uploaded Image">
+                            <p>🗑️ Predicted: <strong>${item.prediction}</strong></p>
+                        </div>`;
+                    });
+                    $("#results").html(resultHtml);
+                },
+                error: function() {
+                    $("#loading").hide();
+                    alert("⚠️ An error occurred while processing images.");
+                }
+            });
+        });
+    </script>
+</body>
+</html> -->
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Classifier 🌱</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Google Fonts for a modern feel -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #E8F5E9; /* Light Green */
+            color: #2E7D32; /* Dark Green */
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-top: 20px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            margin: auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin-top: 30px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-label {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-block;
+            margin-bottom: 15px;
+            transition: 0.3s;
+        }
+
+        .file-label:hover {
+            background: #388E3C;
+        }
+
+        button {
+            background: #2E7D32;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #1B5E20;
+        }
+
+        #loading {
+            display: none;
+            font-size: 16px;
+            color: #FF8F00;
+            margin-top: 15px;
+        }
+
+        #results {
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background: #E8F5E9;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        img {
+            margin-top: 5px;
+            border-radius: 5px;
+            width: 80px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌍 Waste Classification System</h1>
+
+    <div class="container">
+        <form id="upload-form" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="file-input" class="file-label">📸 Choose Images</label>
+            <input type="file" id="file-input" name="images" multiple required>
+            <button type="submit">🚀 Upload & Classify</button>
+        </form>
+    
+        <div id="loading">⏳ Processing images...</div>
+        <div id="results"></div>
+    
+        <!-- Find Nearby Waste Bins Button -->
+        <button onclick="window.location.href='{% url 'waste_bin_map' %}'" style="margin-top: 15px; background: #0288D1;">🗺️ Find Nearby Waste Bins</button>
+
+    </div>
+    
+
+<!-- 
+    <script>
+        function getCsrfToken() {
+            const name = "csrftoken=";
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const cookies = decodedCookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if (cookie.startsWith(name)) {
+                    return cookie.substring(name.length);
+                }
+            }
+            return "";
+        }
+
+        $("#upload-form").on("submit", function(event) {
+            event.preventDefault();
+            const formData = new FormData();
+            const files = document.getElementById("file-input").files;
+
+            for (let i = 0; i < files.length; i++) {
+                formData.append("images", files[i]);
+            }
+
+            $("#loading").show();
+
+            $.ajax({
+                url: "{% url 'predict_batch' %}",
+                type: "POST",
+                data: formData,
+                contentType: false,
+                processData: false,
+                headers: {
+                    'X-CSRFToken': getCsrfToken()
+                },
+                success: function(response) {
+                    $("#loading").hide();
+                    let resultHtml = "<h2>📝 Classification Results</h2>";
+                    response.forEach(function(item) {
+                        resultHtml += `<div class="result-item">
+                            <img src="${item.image_url}" alt="Uploaded Image">
+                            <p>🗑️ Predicted: <strong>${item.prediction}</strong></p>
+                        </div>`;
+                    });
+                    $("#results").html(resultHtml);
+                },
+                error: function() {
+                    $("#loading").hide();
+                    alert("⚠️ An error occurred while processing images.");
+                }
+            });
+        });
+    </script>
+ -->
+
+
+ <script>
+    function getCsrfToken() {
+        const name = "csrftoken=";
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const cookies = decodedCookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            let cookie = cookies[i].trim();
+            if (cookie.startsWith(name)) {
+                return cookie.substring(name.length);
+            }
+        }
+        return "";
+    }
+
+    $("#upload-form").on("submit", function(event) {
+        event.preventDefault();
+        const formData = new FormData();
+        const files = document.getElementById("file-input").files;
+
+        for (let i = 0; i < files.length; i++) {
+            formData.append("images", files[i]);
+        }
+
+        $("#loading").show();
+
+        $.ajax({
+            url: "{% url 'predict_batch' %}",
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            headers: {
+                'X-CSRFToken': getCsrfToken()
+            },
+            success: function(response) {
+                $("#loading").hide();
+                let resultHtml = "<h2>📝 Classification Results</h2>";
+                response.forEach(function(item) {
+                    resultHtml += `<div class="result-item">
+                        <img src="${item.image_url}" alt="Uploaded Image">
+                        <p>🗑️ Predicted: <strong>${item.prediction}</strong></p>
+                        <p>📊 Confidence: <strong>${item.confidence}%</strong></p>
+                        <p>♻️ Tip: <em>${item.disposal_tip}</em></p>
+                    </div>`;
+                });
+                $("#results").html(resultHtml);
+            },
+            error: function() {
+                $("#loading").hide();
+                alert("⚠️ An error occurred while processing images.");
+            }
+        });
+    });
+</script>
+
+
+</body>
+</html>

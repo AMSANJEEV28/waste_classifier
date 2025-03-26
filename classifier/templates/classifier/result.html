@@ -1,0 +1,116 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classification Result</title>
+</head>
+<body>
+    <h1>Classification Result</h1>
+    <img src="{{ image_url }}" alt="Uploaded Image" width="300">
+    <h2>Predicted Waste Type: <strong>{{ prediction }}</strong></h2>
+    <br>
+    <a href="{% url 'home' %}">Upload Another Image</a>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classification Result 🌍</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #E8F5E9;
+            color: #2E7D32;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            margin: auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin-top: 30px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-top: 10px;
+        }
+
+        img {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .result-box {
+            background: #E8F5E9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .confidence {
+            font-size: 1.2rem;
+            color: #FF8F00;
+        }
+
+        .waste-tip {
+            margin-top: 15px;
+            font-size: 1rem;
+            color: #555;
+            font-style: italic;
+        }
+
+        .button {
+            display: inline-block;
+            background: #2E7D32;
+            color: white;
+            padding: 12px 18px;
+            font-size: 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin: 10px;
+            transition: 0.3s;
+        }
+
+        .button:hover {
+            background: #1B5E20;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌱 Classification Result</h1>
+    
+    <div class="container">
+        <img src="{{ image_url }}" alt="Uploaded Image">
+        
+        <div class="result-box">
+            <h2>🗑️ Waste Type: <strong>{{ prediction }}</strong></h2>
+            <p class="confidence">📊 Confidence Score: <strong>{{ confidence }}%</strong></p>
+        </div>
+
+        <p class="waste-tip">♻️ {{ disposal_tip }}</p>
+
+        <a href="{% url 'home' %}" class="button">🔄 Upload Another</a>
+        <a href="" class="button">📍 Find Waste Bins</a>
+    </div>
+</body>
+</html>
