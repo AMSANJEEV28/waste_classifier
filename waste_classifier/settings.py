@@ -29,6 +29,7 @@ ALLOWED_HOSTS = [
     "waste-classifier-z93u.onrender.com",  # Add your Render domain here
     "127.0.0.1",
     "localhost",
+    "waste-classifier-i8ba.onrender.com"
 ]
 
 
