@@ -346,7 +346,13 @@
      -->
 
      <script>
-        var map = L.map('map').setView([30.0240923, 78.2678488], 15);
+        // var map = L.map('map').setView([30.0240923, 78.2678488], 15);
+        var map = L.map('map', {
+            center: [30.0240923, 78.2678488], // Your default coordinates
+            zoom: 15, // Initial zoom level
+            maxZoom: 18 // Increase zoom-in limit (default is usually 18)
+        });
+
     
         // Tile layers
         var normalMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
